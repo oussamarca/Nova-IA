@@ -1,4 +1,4 @@
-const CACHE_NAME = "nova-ia-cache-v1";
+const CACHE_NAME = "nova-ia-cache-v2";
 const urlsToCache = [
   "./",
   "./index.html",
