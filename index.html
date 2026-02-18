@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Nova Assistant</title>
+    </head>
+    <body style="text-align:center;font-family:Arial;margin-top:50px;">
+
+        <h1>🎤 Nova Assistant</h1>
+        <button onclick="startListening()"
+            style="padding:20px;font-size:18px;">Talk</button>
+
+        <p id="status"></p>
+
+        <script>
+const webhookUrl = "https://n8n.srv961724.hstgr.cloud/webhook/test-ia";
+
+function startListening() {
+    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+    recognition.lang = "ar-MA";
+    recognition.start();
+    
+    document.getElementById("status").innerText = "🎧 كنسمع ليك...";
+
+    recognition.onresult = async function(event) {
+        const text = event.results[0][0].transcript;
+        document.getElementById("status").innerText = "🧠 كتفكر...";
+        
+        const response = await fetch(webhookUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ message: text })
+        });
+
+        const data = await response.json();
+        
+        document.getElementById("status").innerText = "🤖 " + data.output;
+
+        const speech = new SpeechSynthesisUtterance(data.output);
+        speech.lang = "ar-SA";
+        window.speechSynthesis.speak(speech);
+    };
+}
+</script>
+
+    </body>
+</html>
