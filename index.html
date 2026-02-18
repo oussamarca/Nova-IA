@@ -51,37 +51,63 @@ g<!DOCTYPE html>
         <h1>🎤 Nova Assistant</h1>
         <button onclick="startListening()">Talk</button>
 
-        <p id="status"></p>
+        <p id="output"></p>
 
         <script>
-const webhookUrl = "https://n8n.srv961724.hstgr.cloud/webhook/test-ia";
+  const output = document.getElementById("output");
 
-function startListening() {
-    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+  function speak(text) {
+    const msg = new SpeechSynthesisUtterance(text);
+    msg.lang = "ar-MA";
+    msg.rate = 1;
+    msg.pitch = 1;
+    window.speechSynthesis.speak(msg);
+  }
+
+  function startListening() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      output.innerHTML = "❌ هاد المتصفح ما كيدعمش التعرف على الصوت.";
+      speak("هاد المتصفح ما كيدعمش التعرف على الصوت");
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
     recognition.lang = "ar-MA";
     recognition.start();
-    
-    document.getElementById("status").innerText = "🎧 كنسمع ليك...";
 
-    recognition.onresult = async function(event) {
-        const text = event.results[0][0].transcript;
-        document.getElementById("status").innerText = "🧠 كتفكر...";
-        
-        const response = await fetch(webhookUrl, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ message: text })
-        });
+    output.innerHTML = "🎙 كنسمع ليك...";
 
-        const data = await response.json();
-        
-        document.getElementById("status").innerText = "🤖 " + data.output;
+    recognition.onresult = function(event) {
+      const text = event.results[0][0].transcript.toLowerCase();
+      output.innerHTML = "✅ قلتي: " + text;
 
-        const speech = new SpeechSynthesisUtterance(data.output);
-        speech.lang = "ar-SA";
-        window.speechSynthesis.speak(speech);
+      if (text.includes("شكون نتي") || text.includes("شكون انت") || text.includes("شكون نتا")) {
+        output.innerHTML = "🤖 أنا Nova، مساعد ديالك الذكي 😎";
+        speak("أنا نوفا، مساعد ديالك الذكي");
+      }
+      else if (text.includes("شنو سميتك") || text.includes("شنو سميتك") || text.includes("سمية ديالك")) {
+        output.innerHTML = "🤖 أنا سميتي Nova 😍";
+        speak("أنا سميتي نوفا");
+      }
+      else {
+        output.innerHTML = "🤖 سمحت، ما فهمتش مزيان.. عاود قولي 😅";
+        speak("سمحت، ما فهمتش مزيان، عاود قولي");
+      }
     };
-}
+
+    recognition.onerror = function() {
+      output.innerHTML = "❌ وقع مشكل.. عاود جرّب.";
+      speak("وقع مشكل، عاود جرّب");
+    };
+  }
+
+  // ترحيب تلقائي ملي كتحل الصفحة
+  window.onload = function() {
+    output.innerHTML = "👋 مرحبا! أنا Nova. شنو بغيتي؟";
+    speak("مرحبا، أنا نوفا. شنو بغيتي؟");
+  };
 </script>
 
     <script>
